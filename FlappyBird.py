@@ -23,6 +23,27 @@ def move_pipes(pipes):
             pipe.centerx -= 5
     return pipes
 
+def check_collisions(pipes):
+    count = 0
+    for pipe in pipes:
+        if bird_rect.colliderect(pipe) and count == 0:
+            return False
+            count = 1
+        else:
+            count = 0
+    if bird_rect.centery <= 18:
+        bird_rect.centery = 18
+        return True
+    elif bird_rect.centery >= 675 - 18:
+        bird_rect.centery = 675 - 18
+        return False
+
+    return True
+
+def rotate_bird(bird):
+    new_bird = pygame.transform.rotozoom(bird, -bird_movement * 3, 1)
+    return new_bird
+
 #Screen Sizes
 width = 432
 height = 768
@@ -38,6 +59,7 @@ clock = pygame.time.Clock()
 #Game Variables
 gravity = 0.25
 bird_movement = 0
+game_active = True
 
 #Creation of surfaces
 #Background surface
@@ -50,7 +72,7 @@ floor_surface = pygame.transform.scale(floor_surface, (width, 168))
 floor_x_position = 0
 
 #Bird surface
-bird_surface = pygame.image.load("assets/bluebird-midflap.png").convert()
+bird_surface = pygame.image.load("assets/bluebird-midflap.png").convert_alpha()
 bird_surface = pygame.transform.scale(bird_surface, (51, 36))
 bird_rect = bird_surface.get_rect(center = (75, height/2))
 
@@ -70,9 +92,14 @@ while run:
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and game_active == True:
                 bird_movement = 0
                 bird_movement -= 9
+            if event.key == pygame.K_SPACE and game_active == False:
+                game_active = True
+                pipe_list.clear()
+                bird_rect.centery = height/2
+                bird_movement = -9
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
             print(pipe_list)
@@ -80,16 +107,17 @@ while run:
     #Background 
     screen.blit(bg_surface, (0, 0))
     
-    #Bird
-    bird_movement += gravity
-    bird_rect.centery += bird_movement
-    if bird_rect.centery <= 18:
-        bird_rect.centery = 18
-    screen.blit(bird_surface, bird_rect)
+    if game_active:
+        #Bird
+        bird_movement += gravity
+        bird_rect.centery += bird_movement
+        bird_rotated = rotate_bird(bird_surface)
+        screen.blit(bird_rotated, bird_rect)
+        game_active = check_collisions(pipe_list)
 
-    #Pipes
-    draw_pipes(pipe_list)
-    pipe_list = move_pipes(pipe_list)
+        #Pipes
+        draw_pipes(pipe_list)
+        pipe_list = move_pipes(pipe_list)
 
     #Floor
     screen.blit(floor_surface, (floor_x_position, 675))
