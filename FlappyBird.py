@@ -4,7 +4,7 @@ import pygame, random
 def create_pipe():
     random_height = random.choice(pipe_height)
     bottom_pipe = pipe_surface.get_rect(midtop = (width + 100, random_height))
-    top_pipe = pipe_surface.get_rect(midbottom = (width + 100, random_height-225))
+    top_pipe = pipe_surface.get_rect(midbottom = (width + 100, random_height - 225))
     return bottom_pipe, top_pipe
 
 def draw_pipes(pipes):
@@ -88,6 +88,10 @@ sound_count = 0
 death_count = 0
 
 #Creation of surfaces
+#Logo surface
+logo_surface = pygame.image.load("assets/Logo.png").convert_alpha()
+pygame.display.set_icon(logo_surface)
+
 #Background surface
 bg_surface = pygame.image.load("assets/background-day.png").convert()
 bg_surface = pygame.transform.scale(bg_surface, (width, height))
