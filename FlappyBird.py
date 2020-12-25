@@ -63,6 +63,7 @@ def add_score(pipes, score):
         pipe = pipes[0]
         if pipe[0] == 73:
             score += 1
+            score_sound.play()
     return score
 
 #Screen Sizes
@@ -83,6 +84,8 @@ bird_movement = 0
 game_active = True
 score = 0
 high_score = 0
+sound_count = 0
+death_count = 0
 
 #Creation of surfaces
 #Background surface
@@ -116,6 +119,15 @@ pipe_height = [500, 400, 300]
 #Text surface
 score_font = pygame.font.Font("04B_19.ttf", 40)
 
+#Game over surface
+game_over_surface = pygame.transform.scale(pygame.image.load("assets/message.png").convert_alpha(), (276, 400))
+game_over_rect = game_over_surface.get_rect(center = (width/2, height/2 - 30))
+
+#Sounds
+flap_sound = pygame.mixer.Sound("sound/sfx_wing.wav")
+death_sound = pygame.mixer.Sound("sound/sfx_hit.wav")
+score_sound = pygame.mixer.Sound("sound/sfx_point.wav")
+
 #Loop
 run = True
 while run:
@@ -127,13 +139,24 @@ while run:
             if event.key == pygame.K_SPACE and game_active == True:
                 bird_movement = 0
                 bird_movement -= 9
+                flap_sound.play()
             if event.key == pygame.K_SPACE and game_active == False:
-                game_active = True
-                pipe_list.clear()
-                bird_rect.centery = height/2
-                bird_movement = -9
-                bird_index = 1
-                score = 0
+                if sound_count == 0:
+                    game_active = True
+                    pipe_list.clear()
+                    bird_rect.centery = height/2
+                    bird_movement = -9
+                    bird_index = 1
+                    score = 0
+                    flap_sound.play()
+                    sound_count = 1
+                else:
+                    game_active = True
+                    pipe_list.clear()
+                    bird_rect.centery = height/2
+                    bird_movement = -9
+                    bird_index = 1
+                    score = 0
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
         if event.type == FLAPEVENT:
@@ -148,6 +171,7 @@ while run:
     screen.blit(bg_surface, (0, 0))
     
     if game_active:
+        death_count = 0
         #Bird
         bird_movement += gravity
         bird_rect.centery += bird_movement
@@ -163,9 +187,14 @@ while run:
         score = add_score(pipe_list, score)
         display_score(game_active)
     else:
+        if death_count == 0:
+            death_sound.play()
+            death_count = 1
+        sound_count = 0
         if score > high_score:
             high_score = score
         display_score(game_active)
+        screen.blit(game_over_surface, game_over_rect)
 
     #Floor
     screen.blit(floor_surface, (floor_x_position, 675))
