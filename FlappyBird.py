@@ -187,6 +187,7 @@ while run:
         score = add_score(pipe_list, score)
         display_score(game_active)
 
+        #Dark mode
         if score >= 50:
             bird_downflap = pygame.transform.scale(pygame.image.load("assets/yellowbird-downflap.png").convert_alpha(), (51, 36))
             bird_midflap = pygame.transform.scale(pygame.image.load("assets/yellowbird-midflap.png").convert_alpha(), (51, 36))
