@@ -186,6 +186,22 @@ while run:
         #Text displaying
         score = add_score(pipe_list, score)
         display_score(game_active)
+
+        if score >= 50:
+            bird_downflap = pygame.transform.scale(pygame.image.load("assets/yellowbird-downflap.png").convert_alpha(), (51, 36))
+            bird_midflap = pygame.transform.scale(pygame.image.load("assets/yellowbird-midflap.png").convert_alpha(), (51, 36))
+            bird_upflap = pygame.transform.scale(pygame.image.load("assets/yellowbird-upflap.png").convert_alpha(), (51, 36)) 
+            bird_list = [bird_downflap, bird_midflap, bird_upflap]
+            pipe_surface = pygame.transform.scale(pygame.image.load("assets/pipe-red.png").convert(), (78, 480))
+            bg_surface = pygame.transform.scale(pygame.image.load("assets/background-night.png").convert(), (width, height))
+        else:
+            bird_downflap = pygame.transform.scale(pygame.image.load("assets/bluebird-downflap.png").convert_alpha(), (51, 36))
+            bird_midflap = pygame.transform.scale(pygame.image.load("assets/bluebird-midflap.png").convert_alpha(), (51, 36))
+            bird_upflap = pygame.transform.scale(pygame.image.load("assets/bluebird-upflap.png").convert_alpha(), (51, 36))
+            bird_list = [bird_downflap, bird_midflap, bird_upflap]
+            pipe_surface = pygame.transform.scale(pygame.image.load("assets/pipe-green.png").convert(), (78, 480))
+            bg_surface = pygame.transform.scale(pygame.image.load("assets/background-day.png").convert(), (width, height))
+            
     else:
         if death_count == 0:
             death_sound.play()
