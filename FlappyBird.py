@@ -44,6 +44,27 @@ def rotate_bird(bird):
     new_bird = pygame.transform.rotozoom(bird, -bird_movement * 3, 1)
     return new_bird
 
+def display_score(game_active):
+    if game_active:
+        score_surface = score_font.render(f"Score: {score}", True, (255, 255, 255))
+        score_rect = score_surface.get_rect(center = (width/2, 75))
+        screen.blit(score_surface, score_rect)
+    else:
+        score_surface = score_font.render(f"Score: {score}", True, (255, 255, 255))
+        score_rect = score_surface.get_rect(center = (width/2, 75))
+        screen.blit(score_surface, score_rect)
+
+        high_score_surface = score_font.render(f"High Score: {high_score}", True, (255, 255, 255))
+        high_score_rect = high_score_surface.get_rect(center = (width/2, 625))
+        screen.blit(high_score_surface, high_score_rect)
+
+def add_score(pipes, score):
+    if len(pipes) > 0:
+        pipe = pipes[0]
+        if pipe[0] == 73:
+            score += 1
+    return score
+
 #Screen Sizes
 width = 432
 height = 768
@@ -60,6 +81,8 @@ clock = pygame.time.Clock()
 gravity = 0.25
 bird_movement = 0
 game_active = True
+score = 0
+high_score = 0
 
 #Creation of surfaces
 #Background surface
@@ -72,9 +95,15 @@ floor_surface = pygame.transform.scale(floor_surface, (width, 168))
 floor_x_position = 0
 
 #Bird surface
-bird_surface = pygame.image.load("assets/bluebird-midflap.png").convert_alpha()
-bird_surface = pygame.transform.scale(bird_surface, (51, 36))
-bird_rect = bird_surface.get_rect(center = (75, height/2))
+bird_downflap = pygame.transform.scale(pygame.image.load("assets/bluebird-downflap.png").convert_alpha(), (51, 36))
+bird_midflap = pygame.transform.scale(pygame.image.load("assets/bluebird-midflap.png").convert_alpha(), (51, 36))
+bird_upflap = pygame.transform.scale(pygame.image.load("assets/bluebird-upflap.png").convert_alpha(), (51, 36))
+bird_list = [bird_downflap, bird_midflap, bird_upflap]
+bird_index = 1
+bird_surface = bird_list[1]
+bird_rect = bird_surface.get_rect(center = (75, height/2)) 
+FLAPEVENT = pygame.USEREVENT + 1 
+pygame.time.set_timer(FLAPEVENT, 200)
 
 #Pipe surface
 pipe_surface = pygame.image.load("assets/pipe-green.png").convert()
@@ -83,6 +112,9 @@ SPAWNPIPE = pygame.USEREVENT
 pygame.time.set_timer(SPAWNPIPE, 1300)
 pipe_list = []
 pipe_height = [500, 400, 300]
+
+#Text surface
+score_font = pygame.font.Font("04B_19.ttf", 40)
 
 #Loop
 run = True
@@ -100,10 +132,18 @@ while run:
                 pipe_list.clear()
                 bird_rect.centery = height/2
                 bird_movement = -9
+                bird_index = 1
+                score = 0
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
-            print(pipe_list)
-    
+        if event.type == FLAPEVENT:
+            if bird_index < 2:
+                bird_index += 1
+            else:
+                bird_index = 0
+            bird_surface = bird_list[bird_index]
+            bird_rect = bird_surface.get_rect(center = (75, bird_rect.centery))
+
     #Background 
     screen.blit(bg_surface, (0, 0))
     
@@ -118,6 +158,14 @@ while run:
         #Pipes
         draw_pipes(pipe_list)
         pipe_list = move_pipes(pipe_list)
+
+        #Text displaying
+        score = add_score(pipe_list, score)
+        display_score(game_active)
+    else:
+        if score > high_score:
+            high_score = score
+        display_score(game_active)
 
     #Floor
     screen.blit(floor_surface, (floor_x_position, 675))
